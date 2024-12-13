@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2>Assignments</h2>
+    </div>
+    {% if user.is_authenticated and perms.dashboard.add_assignment %}
+    <div class="col-md-4 text-end">
+        <a href="{% url 'dashboard:assignment_create' %}" class="btn btn-primary">
+            <i data-feather="plus"></i> Create Assignment
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if assignments %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Class</th>
+                            <th>Due Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for assignment in assignments %}
+                            <tr>
+                                <td>{{ assignment.title }}</td>
+                                <td>{{ assignment.class.name }}</td>
+                                <td>{{ assignment.due_date|date:"Y-m-d H:i" }}</td>
+                                <td>
+                                    {% if current_user.role == 'student' %}
+                                        {% if assignment.submitted_at %}
+                                            <span class="badge bg-success">Submitted</span>
+                                        {% elif assignment.due_date < now %}
+                                            <span class="badge bg-danger">Overdue</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">Pending</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="badge bg-info">
+                                            {{ assignment.submissions|length }}/{{ assignment.class.students|length }} Submitted
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if perms.dashboard.change_assignment %}
+                                        <a href="{% url 'dashboard:assignment_edit' assignment.id %}" 
+                                           class="btn btn-sm btn-secondary">
+                                            <i data-feather="edit"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-danger" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#deleteModal{{ assignment.id }}">
+                                            <i data-feather="trash-2"></i>
+                                        </button>
+                                    {% else %}
+                                        {% if not assignment.submitted %}
+                                            <a href="{% url 'dashboard:assignment_detail' assignment.id %}" 
+                                               class="btn btn-sm btn-primary">Submit</a>
+                                        {% else %}
+                                            <a href="{% url 'dashboard:assignment_detail' assignment.id %}" 
+                                               class="btn btn-sm btn-info">View</a>
+                                        {% endif %}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-muted text-center">No assignments found.</p>
+        {% endif %}
+    </div>
+</div>
+
+{% for assignment in assignments %}
+    {% if current_user.role == 'teacher' %}
+        <div class="modal fade" id="deleteModal{{ assignment.id }}" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Delete Assignment</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to delete "{{ assignment.title }}"?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <form action="{% url 'dashboard:assignment_delete' assignment.id %}" method="POST" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">Delete</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endfor %}
+{% endblock %}

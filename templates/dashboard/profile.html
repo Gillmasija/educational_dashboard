@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Profile Settings</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {{ form.csrf_token }}
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <h5>Account Information</h5>
+                            <p class="mb-2">Username: {{ current_user.username }}</p>
+                            <p class="mb-2">Email: {{ current_user.email }}</p>
+                            <p class="mb-2">Role: {{ current_user.role.capitalize() }}</p>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        {{ form.bio.label(class="form-label") }}
+                        {{ form.bio(class="form-control", rows="4") }}
+                        {% if form.bio.errors %}
+                            {% for error in form.bio.errors %}
+                                <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <button type="submit" class="btn btn-primary">Update Profile</button>
+                </form>
+            </div>
+        </div>
+
+        {% if current_user.role == 'teacher' %}
+        <div class="card mt-4">
+            <div class="card-header">
+                <h4 class="mb-0">Teaching Statistics</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <h5>Classes</h5>
+                            <h2>{{ classes|length }}</h2>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <h5>Students</h5>
+                            <h2>{{ total_students }}</h2>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <h5>Assignments</h5>
+                            <h2>{{ total_assignments }}</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="card mt-4">
+            <div class="card-header">
+                <h4 class="mb-0">Academic Progress</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <h5>Assignments</h5>
+                            <h2>{{ completed_assignments }}/{{ total_assignments }}</h2>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <h5>Average Grade</h5>
+                            <h2>{{ average_grade|default('N/A') }}</h2>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <h5>Attendance</h5>
+                            <h2>{{ attendance_rate|default('N/A') }}%</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

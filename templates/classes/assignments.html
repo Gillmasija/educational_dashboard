@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2>{{ class_obj.name }} - Assignments</h2>
+    </div>
+    {% if is_teacher %}
+    <div class="col-md-4 text-end">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAssignmentModal">
+            <i data-feather="plus"></i> Create Assignment
+        </button>
+    </div>
+    {% endif %}
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if assignments %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Due Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for assignment in assignments %}
+                            <tr>
+                                <td>{{ assignment.title }}</td>
+                                <td>{{ assignment.due_date.strftime('%Y-%m-%d %I:%M %p') }}</td>
+                                <td>
+                                    {% if is_teacher %}
+                                        <span class="badge bg-info">Teacher</span>
+                                    {% else %}
+                                        {% if assignment.submitted %}
+                                            <span class="badge bg-success">Submitted</span>
+                                            {% if assignment.grade is not none %}
+                                                <span class="badge bg-primary">Grade: {{ assignment.grade }}</span>
+                                            {% endif %}
+                                        {% elif assignment.due_date < now %}
+                                            <span class="badge bg-danger">Overdue</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">Pending</span>
+                                        {% endif %}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if is_teacher %}
+                                        <button class="btn btn-sm btn-info">View Submissions</button>
+                                    {% else %}
+                                        {% if not assignment.submitted %}
+                                            <a href="{{ url_for('submit_assignment', assignment_id=assignment.id) }}" 
+                                               class="btn btn-sm btn-primary">Submit</a>
+                                        {% else %}
+                                            <a href="{{ url_for('submit_assignment', assignment_id=assignment.id) }}" 
+                                               class="btn btn-sm btn-secondary">View Submission</a>
+                                        {% endif %}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-muted text-center">No assignments found.</p>
+        {% endif %}
+    </div>
+</div>
+
+{% if is_teacher %}
+<div class="modal fade" id="addAssignmentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create Assignment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Title</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="due_date" class="form-label">Due Date</label>
+                        <input type="datetime-local" class="form-control" id="due_date" name="due_date" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Assignment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

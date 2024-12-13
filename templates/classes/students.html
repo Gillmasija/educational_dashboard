@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2>{{ class_obj.name }} - Manage Students</h2>
+    </div>
+    <div class="col-md-4 text-end">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addStudentModal">
+            <i data-feather="user-plus"></i> Add Student
+        </button>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if students %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Enrolled Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in students %}
+                            <tr>
+                                <td>{{ student.username }}</td>
+                                <td>{{ student.email }}</td>
+                                <td>{{ student.date_joined|date:"Y-m-d" }}</td>
+                                <td>
+                                    <form action="{% url 'dashboard:remove_student_from_class' class_obj.id %}" method="POST" class="d-inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="student_id" value="{{ student.id }}">
+                                        <button type="submit" class="btn btn-sm btn-danger">
+                                            <i data-feather="user-minus"></i> Remove
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-muted text-center">No students enrolled in this class.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="modal fade" id="addStudentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Student</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{% url 'dashboard:add_student_to_class' class_obj.id %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="student_id" class="form-label">Select Student</label>
+                        <select class="form-control" id="student_id" name="student_id" required>
+                            <option value="">Choose a student...</option>
+                            {% for student in available_students %}
+                                <option value="{{ student.id }}">{{ student.username }} ({{ student.email }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Student</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

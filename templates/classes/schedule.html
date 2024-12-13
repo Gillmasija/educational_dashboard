@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2>{{ class_obj.name }} - Schedule</h2>
+    </div>
+    {% if session.get('role') == 'teacher' %}
+    <div class="col-md-4 text-end">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addScheduleModal">
+            <i data-feather="plus"></i> Add Schedule
+        </button>
+    </div>
+    {% endif %}
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if schedules %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Day</th>
+                            <th>Start Time</th>
+                            <th>End Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for schedule in schedules %}
+                            <tr>
+                                <td>{{ schedule.day_of_week }}</td>
+                                <td>{{ schedule.start_time.strftime('%I:%M %p') }}</td>
+                                <td>{{ schedule.end_time.strftime('%I:%M %p') }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-muted text-center">No schedules found.</p>
+        {% endif %}
+    </div>
+</div>
+
+{% if session.get('role') == 'teacher' %}
+<div class="modal fade" id="addScheduleModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Schedule</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST">
+                {{ form.csrf_token }}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        {{ form.day.label(class="form-label") }}
+                        {{ form.day(class="form-select") }}
+                        {% if form.day.errors %}
+                            {% for error in form.day.errors %}
+                                <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.start_time.label(class="form-label") }}
+                        {{ form.start_time(class="form-control", type="time") }}
+                        {% if form.start_time.errors %}
+                            {% for error in form.start_time.errors %}
+                                <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.end_time.label(class="form-label") }}
+                        {{ form.end_time(class="form-control", type="time") }}
+                        {% if form.end_time.errors %}
+                            {% for error in form.end_time.errors %}
+                                <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Schedule</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

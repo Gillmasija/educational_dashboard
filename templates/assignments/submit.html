@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">{{ assignment.title }} - Submit Assignment</h4>
+            </div>
+            <div class="card-body">
+                <div class="mb-4">
+                    <h6>Class</h6>
+                    <p>{{ assignment.class_name }}</p>
+                    
+                    <h6>Description</h6>
+                    <p>{{ assignment.description }}</p>
+                    
+                    <h6>Due Date</h6>
+                    <p>{{ assignment.due_date.strftime('%Y-%m-%d %I:%M %p') }}</p>
+                </div>
+                
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="submission_text" class="form-label">Your Submission</label>
+                        <textarea class="form-control" id="submission_text" name="submission_text" 
+                                rows="6" required>{{ submission.submission_text if submission else '' }}</textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        {{ 'Update Submission' if submission else 'Submit Assignment' }}
+                    </button>
+                    <a href="{{ url_for('manage_assignments', class_id=assignment.class_id) }}" 
+                       class="btn btn-secondary">Back to Assignments</a>
+                </form>
+                
+                {% if submission %}
+                    <div class="mt-4">
+                        <h6>Submission Status</h6>
+                        <p>Submitted: {{ submission.submitted_at.strftime('%Y-%m-%d %I:%M %p') }}</p>
+                        
+                        {% if submission.grade is not none %}
+                            <h6>Grade</h6>
+                            <p>{{ submission.grade }}</p>
+                            
+                            {% if submission.feedback %}
+                                <h6>Feedback</h6>
+                                <p>{{ submission.feedback }}</p>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

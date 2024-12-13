@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<!-- User Profile Header -->
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-circle bg-primary p-3 me-3">
+                        <i data-feather="user" class="text-white" style="width: 32px; height: 32px;"></i>
+                    </div>
+                    <div>
+                        <h3 class="mb-1">Welcome back, {{ username }}!</h3>
+                        {% if role == 'teacher' %}
+                            <p class="text-muted mb-0">Let's continue inspiring young minds today</p>
+                        {% else %}
+                            <p class="text-muted mb-0">Ready to continue learning?</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 text-end">
+                {% if role == 'teacher' %}
+                    <a href="{% url 'dashboard:class_create' %}" class="btn btn-primary me-2">
+                        <i data-feather="plus-circle"></i> New Class
+                    </a>
+                    <a href="{% url 'dashboard:class_list' %}" class="btn btn-outline-primary">
+                        <i data-feather="list"></i> My Classes
+                    </a>
+                {% else %}
+                    <a href="{% url 'dashboard:assignment_list' %}" class="btn btn-primary">
+                        <i data-feather="book"></i> My Assignments
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Stats -->
+<div class="row mb-4">
+    {% if role == 'teacher' %}
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Total Classes</h6>
+                    <h2 class="mb-0">{{ classes.count }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Total Students</h6>
+                    <h2 class="mb-0">{{ total_students }}</h2>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Enrolled Classes</h6>
+                    <h2 class="mb-0">{{ enrolled_classes.count }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Pending Assignments</h6>
+                    <h2 class="mb-0">{{ upcoming_assignments.count }}</h2>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Main Content -->
+<div class="row">
+    <!-- Left Column -->
+    <div class="col-md-8">
+        {% if role == 'teacher' %}
+            <!-- Classes -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">My Classes</h5>
+                </div>
+                <div class="card-body">
+                    {% if classes %}
+                        <div class="list-group">
+                            {% for class in classes %}
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1">{{ class.name }}</h6>
+                                            <small class="text-muted">{{ class.students.count }} students enrolled</small>
+                                        </div>
+                                        <a href="{% url 'dashboard:class_detail' class.id %}" class="btn btn-sm btn-outline-primary">
+                                            View
+                                        </a>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-center text-muted my-4">No classes created yet</p>
+                    {% endif %}
+                </div>
+            </div>
+        {% else %}
+            <!-- Assignments -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">My Assignments</h5>
+                </div>
+                <div class="card-body">
+                    {% if upcoming_assignments %}
+                        <div class="list-group">
+                            {% for assignment in upcoming_assignments %}
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1">{{ assignment.title }}</h6>
+                                            <small class="text-muted">Due: {{ assignment.due_date|date:"F d, Y" }}</small>
+                                        </div>
+                                        <a href="{% url 'dashboard:assignment_detail' assignment.id %}" class="btn btn-sm btn-outline-primary">
+                                            View
+                                        </a>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-center text-muted my-4">No upcoming assignments</p>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Right Column -->
+    <div class="col-md-4">
+        <!-- Recent Activity -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Recent Activity</h5>
+            </div>
+            <div class="card-body">
+                {% if role == 'teacher' %}
+                    {% if recent_submissions %}
+                        <div class="list-group">
+                            {% for submission in recent_submissions %}
+                                <div class="list-group-item">
+                                    <small class="text-muted">{{ submission.submitted_at|date:"F d, Y" }}</small>
+                                    <p class="mb-1">{{ submission.student.username }} submitted an assignment</p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-center text-muted my-4">No recent submissions</p>
+                    {% endif %}
+                {% else %}
+                    {% if recent_grades %}
+                        <div class="list-group">
+                            {% for grade in recent_grades %}
+                                <div class="list-group-item">
+                                    <small class="text-muted">{{ grade.submitted_at|date:"F d, Y" }}</small>
+                                    <p class="mb-1">Grade received: {{ grade.score }}%</p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-center text-muted my-4">No recent grades</p>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+        
+        {% if role == 'student' and admin_projects %}
+        <!-- Admin Projects -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Featured Projects</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    {% for project in admin_projects %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">{{ project.title }}</h6>
+                                    <small class="text-muted">{{ project.description }}</small>
+                                </div>
+                                <a href="{% url 'dashboard:item_detail' project.id %}" class="btn btn-sm btn-outline-primary">
+                                    View Details
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}

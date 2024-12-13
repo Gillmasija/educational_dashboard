@@ -1,0 +1,42 @@
+/* Custom styles to complement Bootstrap dark theme */
+body {
+    min-height: 100vh;
+    background-color: var(--bs-dark);
+    color: var(--bs-light);
+}
+
+.card {
+    background-color: var(--bs-dark);
+    border: 1px solid var(--bs-gray-700);
+}
+
+.card-header {
+    background-color: var(--bs-gray-800);
+    border-bottom: 1px solid var(--bs-gray-700);
+}
+
+/* Custom form styles */
+.form-control {
+    background-color: var(--bs-gray-800);
+    border-color: var(--bs-gray-700);
+    color: var(--bs-light);
+}
+
+.form-control:focus {
+    background-color: var(--bs-gray-800);
+    border-color: var(--bs-primary);
+    color: var(--bs-light);
+}
+
+/* Custom table styles */
+.table {
+    color: var(--bs-light);
+}
+
+.table thead th {
+    border-bottom-color: var(--bs-gray-700);
+}
+
+.table td, .table th {
+    border-top-color: var(--bs-gray-700);
+}
